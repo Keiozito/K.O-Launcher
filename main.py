@@ -10,6 +10,7 @@ import sys
 import shutil
 import time
 import ast
+import gdown
 
 def calladm():
     if not ctypes.windll.shell32.IsUserAnAdmin():
@@ -20,10 +21,11 @@ calladm()
 
 def menu():
     # Functions to print inside menu
-    menu_l = ["Auto Shop", "Update"]
+    menu_l = ["Auto Shop", "Update", "Full Modpack"]
     menu_f = {
         "0" : auto_shop,
-        "1" : get_version
+        "1" : get_version,
+        "2" : full_version
     }
 
     os.system("mode con cols=130 lines=30")
@@ -47,7 +49,7 @@ def menu():
     ;   |,'   \  ; |`---`                      |  ,     .-./ `--`----'   '---'        \   \  / `--''       \   \  /           
     '---'      `--"                             `--`---'                               `----'               `----'           
 
-    K.O Launcher - V1.2.5
+    K.O Launcher - V1.3.6
     """
     for line in logo.split("\n"):
         print(Fore.LIGHTMAGENTA_EX + line)
@@ -70,7 +72,9 @@ def menu():
         menu()
 
 def pcolor(c, t, m="-"):
-    # Red = 1, Green = 2, Yellow = 3, Full red = 4
+    # c = COLOR; Red = 1, Green = 2, Yellow = 3, Full red = 4
+    # t = TEXT
+    # m = MODE; - for output, + for input, o for neutral
 
     if c == 1:
         print(Fore.LIGHTRED_EX + f"[{m}]" + Fore.WHITE + t)
@@ -172,7 +176,7 @@ def connection(url):
         pcolor(4, "Aborting.")
         menu()
 def get_version():
-    url = "https://api.github.com/repos/Keyozito/Keio-da-Cocker/tags"
+    url = "https://api.github.com/repos/Keiozito/Keio-da-Cocker/tags"
 
     p = confirm_path()
 
@@ -223,7 +227,7 @@ def zip_create(fp, f, r):
     tqdm._instances.clear()
     pcolor(2, f"{f} created\n")
 def zip_extract(fp, p):
-    pcolor(3, "Extracting Zip file")
+    pcolor(3, "Extracting Zip file", "O")
     with zipfile.ZipFile(fp, "r") as zip_file:
         zip_file.extractall(p)
 
@@ -302,7 +306,7 @@ def check_chain(new_current, tags, p):
             update(next_v, p, tags)
 def update(version, p, tags):
     file_zip = f"Update.{version}.zip"
-    url = f"https://github.com/Keyozito/Keio-da-Cocker/releases/download/{version}/{file_zip}"
+    url = f"https://github.com/Keiozito/Keio-da-Cocker/releases/download/{version}/{file_zip}"
 
     pcolor(3, f"Downloading {file_zip}")
     r = connection(url)
@@ -316,5 +320,42 @@ def update(version, p, tags):
 
     pcolor(2, "Modpack ready to go!")
     os.system("pause")
+def full_version():
+    url_tags = "https://api.github.com/repos/Keiozito/Keio-da-Cocker/tags"
 
+    pcolor(3, "Requesting Releases")
+    r = connection(url_tags)
+    tags = r.json()
+    av = []
+
+    for i in tags:
+        av.append(i["name"])
+
+    # Path
+    p = confirm_path()
+    p = p.replace("Keio da Cocker", "")
+    file_path = f"{p}/Keio da Cocker {av[0]}.zip"
+
+    # Google drive part
+    rf = connection(f"https://api.github.com/repos/Keiozito/Keio-da-Cocker/releases/tags/{av[0]}").json()
+
+    # Remove everything, except the Google drive file link
+    release_body_id = rf["body"]
+    release_body_id = release_body_id.splitlines()[1]
+    release_body_id = release_body_id.replace("> ### [Full Version](https://drive.google.com/file/d/", "https://drive.google.com/uc?id=")
+    release_body_id = release_body_id.replace("/view?usp=sharing)", "")
+
+    # Downloading file
+    try:
+        full_file = gdown.download(release_body_id, file_path)
+        if full_file:
+            zip_extract(file_path, p)
+            pcolor(2, "Modpack ready to go!")
+            os.system("pause")
+        else:
+            pcolor(4, "Google Drive file downloading error")
+            menu()
+    except Exception as E:
+        pcolor(4, E)
+        menu()
 menu()
