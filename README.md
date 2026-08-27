@@ -7,7 +7,7 @@ Here you can automatically update you already existing game, the path will be as
 
 **K.O Launcher** uses *Request Lib* in order to retrieve update information, and .zip files from Github  releases page, than compare it to the current version then decides if a update is needed or not.
 
-> ⚠️ This program is still in development! Some older versions may be incompatible with the launcher, and more uses will be added to it.
+> ⚠️ This program is still in development! Some older versions may be incompatible with the launcher, and more functionalities will be added to it.
 
 # 📦 Launcher Info
 * Developed in Python 3.8

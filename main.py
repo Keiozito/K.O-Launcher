@@ -1,5 +1,6 @@
 import requests
 import ctypes
+import pyautogui
 from tqdm import tqdm
 from colorama import init, Fore, Style
 import getpass
